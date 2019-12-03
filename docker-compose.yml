@@ -6,6 +6,10 @@ services:
       - "4242:4242"
     environment:
       DATABASE_URL: postgres://postgres:unleash@db/postgres
+      GOOGLE_CLIENT_ID: 1234
+      GOOGLE_CLIENT_SECRET: 1234
+      GOOGLE_CALLBACK_URL: http://72.25.217.165:4242/api/auth/callback
+      WHITELISTED_DOMAIN: pizzahut.com
     depends_on:
       - db
     command: > 

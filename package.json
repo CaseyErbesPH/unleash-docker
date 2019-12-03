@@ -12,6 +12,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@passport-next/passport": "^2.1.0",
+    "@passport-next/passport-google-oauth2": "^1.0.0",
     "unleash-server": "^3.2.14"
   }
 }
