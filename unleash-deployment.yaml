@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.19.0 (f63a961c)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: unleash
+  name: unleash
+spec:
+  progressDeadlineSeconds: 2147483647
+  replicas: 1
+  revisionHistoryLimit: 2147483647
+  selector:
+    matchLabels:
+      io.kompose.service: unleash
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.19.0 (f63a961c)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: unleash
+    spec:
+      hostAliases:
+        - ip: "127.0.0.1"
+          hostnames:
+          - "db"
+      containers:
+      - args:
+        - sh
+        - -c
+        - |2-
+            while ! nc -z db 5432; do
+              echo 'Postgres is unavailable.'
+              sleep 1
+            done
+            npm run start
+        env:
+        - name: DATABASE_URL
+          value: postgres://postgres:unleash@db/postgres
+        - name: GOOGLE_CALLBACK_URL
+          value: http://72.25.217.165:4242/api/auth/callback
+        - name: GOOGLE_CLIENT_ID
+          value: "1234"
+        - name: GOOGLE_CLIENT_SECRET
+          value: "1234"
+        - name: WHITELISTED_DOMAIN
+          value: pizzahut.com
+        image: unleash-web:latest
+        imagePullPolicy: IfNotPresent
+        name: web
+        ports:
+        - containerPort: 4242
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      - image: postgres:10-alpine
+        imagePullPolicy: IfNotPresent
+        name: db
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+          - mountPath: /var/lib/postgresql/data
+            name: postgresdb
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: postgresdb
+          persistentVolumeClaim:
+            claimName: unleash-pv-claim
+status: {}
